@@ -25,7 +25,7 @@ defmodule NflRusher.Repo.Migrations.CreateRushers do
       add :lng, :integer
       add :lng_td, :boolean, default: false, null: false
       add :fd, :integer
-      add :fd_p, :integer
+      add :fd_p, :float
       add :plus_20, :integer
       add :plus_40, :integer
       add :fumbles, :integer
