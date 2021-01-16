@@ -2,12 +2,14 @@ use Mix.Config
 
 # Configure your database
 config :nfl_rusher, NflRusher.Repo,
-  username: "postgres",
-  password: "postgres",
-  database: "nfl_rusher_dev",
-  hostname: "localhost",
+  username: System.get_env("PGUSER"),
+  password: System.get_env("PGPASSWORD"),
+  database: System.get_env("PGDATABASE"),
+  hostname: System.get_env("PGHOST"), 
+  port: System.get_env("PGPORT"),
   show_sensitive_data_on_connection_error: true,
-  pool_size: 10
+  pool_size: 10,
+  pool: Ecto.Adapters.SQL.Sandbox
 
 # For development, we disable any cache and enable
 # debugging and code reloading.
