@@ -1,6 +1,7 @@
 defmodule NflRusher.Rusher do
   use Ecto.Schema
   import Ecto.Changeset
+  import NflRusher.{RusherVersion, RusherName}
 
   schema "rushers" do
     belongs_to :rusher_version, RusherVersion

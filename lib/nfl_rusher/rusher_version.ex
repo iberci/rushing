@@ -8,7 +8,7 @@ defmodule NflRusher.RusherVersion do
     field :started_at, :utc_datetime
     field :completed_at, :utc_datetime
     field :faulted_at, :utc_datetime
-    field :faulted_text, :text
+    field :faulted_reason, :string
     field :file_sha256, :string
   end
 end
