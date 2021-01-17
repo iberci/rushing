@@ -4,20 +4,16 @@ defmodule NflRusher.RusherTest do
   alias NflRusher.Rusher
   import Rusher
 
-  test "rusher names with no player" do
-    cs = changeset(%Rusher{}, %{})
-
-    assert Enum.count(get_field(cs, :rusher_names)) == 0
-  end
-
   test "rusher names with multiple names" do
-    cs = changeset(%Rusher{}, %{player: "First Middle Last"})
+    three_named_rusher = %{sample_rusher() | player: "First Middle Last"}
+    
+    cs = changeset_import(%Rusher{}, three_named_rusher)
 
     assert Enum.count(get_field(cs, :rusher_names)) == 3
   end
 
   test "rusher crud operations" do
-    cs = changeset(%Rusher{}, sample_rusher())
+    cs = changeset_import(%Rusher{}, sample_rusher())
 
     case Repo.insert(cs) do
       {:error, msg} -> flunk(msg)

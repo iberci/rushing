@@ -24,26 +24,29 @@ defmodule NflRusher.Rusher do
   end
 
   @doc false
-  def changeset(rusher, attrs) do
-    rusher
-    |> cast(attrs, [:player, :team, :pos, :att, :att_g, :yds, :yds_g, :td, :lng, :lng_td, :fd, :fd_p, :plus_20, :plus_40, :fum])
-    |> validate_required([:player, :team, :pos, :att, :att_g, :yds, :yds_g, :td, :lng, :lng_td, :fd, :fd_p, :plus_20, :plus_40, :fum])
 
-    |> set_names
+  defp import_fields do
+    [:player, :team, :pos, :att, :att_g, :yds, :yds_g, :td, :lng, :lng_td, :fd, :fd_p, :plus_20, :plus_40, :fum]
+  end
+
+  def changeset_import(cs, attrs) do
+    cs
+      |> cast(attrs, import_fields())
+      |> validate_required(import_fields())
+      |> set_names
   end
 
   defp set_names(cs) do
-
     player = get_field(cs, :player)
 
-    if(player) do
-      rusher_names = Regex.split(~r/[\s,]+/, player)
-        |> Enum.with_index(1)
-        |> Enum.map(fn {name, ordinal}-> %RusherName{name: name, ordinal: ordinal} end)
+    rusher_names = Regex.split(~r/[\s,]+/, player)
+      |> Enum.with_index(1)
+      |> Enum.map(fn ({name, ordinal}) -> build_rusher_name(name, ordinal) end)
      
-      put_change(cs, :rusher_names,  rusher_names)
-    else
-      cs
-    end
+    put_change(cs, :rusher_names,  rusher_names)
+  end
+
+  defp build_rusher_name(name, ordinal) do
+    RusherName.changeset(%RusherName{}, %{name: name, ordinal: ordinal})
   end
 end
