@@ -26,10 +26,9 @@ defmodule NflRusher.RusherVersion do
   end
 
   def changeset_start(cs) do
-    n = now()
     cs
-      |> change
-      |> put_change(:started_at, n)
+      |> changeset
+      |> put_change(:started_at, now())
   end
 
   def changeset_fault(cs, attrs) do

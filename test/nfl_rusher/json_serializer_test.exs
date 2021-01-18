@@ -5,7 +5,7 @@ defmodule NflRusher.JsonSerializerTest do
   @main_test_file "test/rushing.json"
 
   test "json async start serialization of valid file" do
-    {:ok, _version} = JsonSerializer.import(@main_test_file)
+    {:ok, _version} = JsonSerializer.import(@main_test_file, [])
   end
 
 

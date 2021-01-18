@@ -4,24 +4,23 @@ defmodule NflRusher.JsonSerializer do
   alias NflRusher.{Repo, RusherVersion}
   alias Ecto.Changeset
 
+  def import(file_path, options \\ [])
+
+  def import(file_path, [async: false] = options) do
+    file_path
+      |> create_version!(options[:name])
+      |> process_version!
+  end
+
   def import(file_path, options) do
+    file_name = DateTime.utc_now
+      |> DateTime.to_string 
 
-    # default_to async
-    if Map.has_key?(options, :async) && !Keyword.get(options, :async) do
-      file_path
-        |> create_version!(options.name)
-	|> process_version!
-    else
-      file_name = DateTime.utc_now
-        |> DateTime.to_string 
+    import_path =  "imports/"<>file_name
 
-      import_path =  "imports/"<>file_name
+    File.cp(file_path, import_path)
 
-      File.cp(file_path, import_path)
-
-      {:ok, create_version!(import_path, options[:name])}
-    end
-   
+    {:ok, create_version!(import_path, options[:name])}
   end
 
   def process_version!(version) do
@@ -69,27 +68,17 @@ defmodule NflRusher.JsonSerializer do
   end
 
   defp create_version!(file_path, nil) do
-    sha256 = file_to_sha256(file_path)
-
-    RusherVersion.changeset(%RusherVersion{
-      file_sha256: sha256,
-      name: sha256,
-      import_path: file_path
-    })
-      |> Repo.insert!
+    create_version!(file_path, file_to_sha256(file_path))
   end
 
   defp create_version!(file_path, name) do
-    sha256 =  :crypto.hash(:sha256, File.read(file_path))
     
-    {:ok, version} = RusherVersion.changeset_start(%RusherVersion{}, %{
-      file_sha256: sha256,
+    RusherVersion.changeset_start(%RusherVersion{
+      file_sha256: file_to_sha256(file_path), 
       name: name,
-      import_path: file_path
+      import_path: file_path 
     })
       |> Repo.insert!
-
-    version
   end
 
   defp process_start(version) do
@@ -183,13 +172,7 @@ defmodule NflRusher.JsonSerializer do
       |> elem(0)
   end
 
-  defp read_lng(field) do
-    field
-      |> Integer.parse
-      |> elem(0)
-  end
-
-  defp read_lng_td(<<field>> <> "T") do
+  defp read_lng_td(<<_field>> <> "T") do
     true
   end
 

@@ -1,40 +1,40 @@
 defmodule NflRusher.ImportService do
   use GenServer
 
-  @period 5000
+  @period 60000
   alias NflRusher.{JsonSerializer, RusherVersion}
 
   alias NflRusher.Repo
   import Ecto.Query
 
 
-  def start_link(options) do
-    GenServer.start_link(__MODULE__, options, name: __MODULE__)
+  def start_link(state) do
+    GenServer.start_link(__MODULE__, state, name: __MODULE__)
   end
 
-  def init(_state) do
+  def init(state) do
     Process.send_after(self(), :poll, @period)
 
-    {:ok, _state}
+    {:ok, state}
   end
 
   def handle_info(:poll, state) do
     process!()
 
     Process.send_after(self(), :poll, @period)
-    {:ok, state}
+    {:noreply, state}
   end
 
   defp process! do
     awaiting_processing()
-      |> JsonSerializer.process_version!
+      |> Enum.map(&JsonSerializer.process_version!/1)
   end
 
   def awaiting_processing do
-    (from RusherVersion,
-      where: is_nil(:completed_at),
-      where: is_nil(:faulted_at),
-      where: is_nil(:started_at))
+    (from rv in RusherVersion,
+      where: is_nil(rv.completed_at),
+      where: is_nil(rv.faulted_at),
+      where: is_nil(rv.started_at))
       |> Repo.all
   end
 
