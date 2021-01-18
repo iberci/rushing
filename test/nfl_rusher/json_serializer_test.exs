@@ -10,6 +10,6 @@ defmodule NflRusher.JsonSerializerTest do
 
 
   test "json sync serialization of valid file" do
-    {:ok, _version} = JsonSerializer.import(@main_test_file, acync: false)
+    {:ok, _version} = JsonSerializer.import(@main_test_file, async: false)
   end
 end

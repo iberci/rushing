@@ -4,5 +4,4 @@ defmodule NflRusher.RusherVersionTest do
   alias NflRusher.NflRusherVerion
   import RusherVersion
 
-  test "
 end
