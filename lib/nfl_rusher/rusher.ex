@@ -9,6 +9,7 @@ defmodule NflRusher.Rusher do
     field :player, :string
     field :att, :integer
     field :att_g, :float
+    field :avg, :float
     field :fd, :integer
     field :fd_p, :float
     field :lng, :integer
@@ -23,17 +24,20 @@ defmodule NflRusher.Rusher do
     field :fum, :integer
   end
 
-  @doc false
+  @required_default_fields [:avg, :player, :team, :pos, :att, :att_g, :yds, :yds_g, :td, :lng, :lng_td, :fd, :fd_p, :plus_20, :plus_40, :fum]
 
-  defp import_fields do
-    [:player, :team, :pos, :att, :att_g, :yds, :yds_g, :td, :lng, :lng_td, :fd, :fd_p, :plus_20, :plus_40, :fum]
+
+  @doc false
+  def changeset(rusher) do
+    rusher
+      |> change()
+      |> validate_required(@required_default_fields)
+      |> validate_required([:rusher_version])
+      |> set_names
   end
 
-  def changeset_import(cs, attrs) do
-    cs
-      |> cast(attrs, import_fields())
-      |> validate_required(import_fields())
-      |> set_names
+  defp import_fields do
+    @required_default_fields
   end
 
   defp set_names(cs) do

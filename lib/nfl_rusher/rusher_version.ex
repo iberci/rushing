@@ -1,6 +1,7 @@
 defmodule NflRusher.RusherVersion do
   use Ecto.Schema
   import Ecto.Changeset
+  alias NflRusher.Rusher
 
   schema "rusher_versions" do
     has_many :rushers, Rusher
@@ -10,43 +11,50 @@ defmodule NflRusher.RusherVersion do
     field :faulted_at, :utc_datetime
     field :faulted_reason, :string
     field :file_sha256, :string
+    field :inserted_at, :utc_datetime, null: false
+    field :updated_at, :utc_datetime, null: false
   end
 
-  def changeset_start(attrs) do
-    cs = %{}
-      |> cast(attrs, [:name, :started_at, :file_sha256])
-      |> validate_required([:name, :file_sha256])
-
-    cs = case get_field(cs, :started_at) do
-      nil ->
-        {:ok, now} = DateTime.now("Etc/UTC")
-        put_change(cs, :started_at, now)
-      _ ->
-        cs
-    end
-
+  def changeset_start(cs, attrs) do
+    n = now()
     cs
+      |> cast(attrs, [:name, :file_sha256])
+      |> validate_required([:name, :file_sha256])
+      |> put_change(:inserted_at, n)
+      |> put_change(:updated_at, n)
+      |> put_change(:started_at, n)
   end
- 
-  def changeset_fault(version, attrs) do
-    cs = attrs
+
+  def changeset_fault(cs, attrs) do
+    cs
       |> cast(attrs, [:faulted_at, :faulted_reason])
       |> validate_required([:faulted_reason])
-
-    cs = case get_field(cs, :faulted_at) do
-      nil ->
-        {:ok, now} = DateTime.now("Etc/UTC")
-        put_change(cs, :faulted_at, now)
-      _ ->
-        cs
-
-      cs
-    end
+      |> add_faulted_at()
+      |> put_change(:updated_at, now())
   end
 
-  def changeset_complete(version, attrs) do
-    attrs
-      |> cast(attrs, [:completed_at])
-      |> validate_required([:completed_at])
+  def changeset_complete(cs) do
+    cs 
+      |> cast(%{}, [])
+      |> put_change(:completed_at, now())
   end
+
+  defp now() do
+    DateTime.utc_now()
+      |> DateTime.truncate(:second)
+  end
+
+  defp add_faulted_at(cs, nil) do
+    put_change(cs, :faulted_at, now())
+  end
+
+  defp add_faulted_at(cs, _) do
+    cs
+  end
+
+  defp add_faulted_at(cs) do
+    add_faulted_at(cs, get_field(cs, :faulted_at))
+  end
+
+
 end
