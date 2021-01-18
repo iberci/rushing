@@ -13,15 +13,22 @@ defmodule NflRusher.RusherVersion do
     field :file_sha256, :string
     field :inserted_at, :utc_datetime, null: false
     field :updated_at, :utc_datetime, null: false
+    field :import_path, :string
   end
 
-  def changeset_start(cs, attrs) do
+  def changeset(cs) do
     n = now()
     cs
-      |> cast(attrs, [:name, :file_sha256])
-      |> validate_required([:name, :file_sha256])
+      |> change
+      |> validate_required([:name, :file_sha256, :import_path])
       |> put_change(:inserted_at, n)
       |> put_change(:updated_at, n)
+  end
+
+  def changeset_start(cs) do
+    n = now()
+    cs
+      |> change
       |> put_change(:started_at, n)
   end
 
@@ -35,8 +42,9 @@ defmodule NflRusher.RusherVersion do
 
   def changeset_complete(cs) do
     cs 
-      |> cast(%{}, [])
+      |> change(cs)
       |> put_change(:completed_at, now())
+      |> put_change(:import_path, nil)
   end
 
   defp now() do
@@ -55,6 +63,5 @@ defmodule NflRusher.RusherVersion do
   defp add_faulted_at(cs) do
     add_faulted_at(cs, get_field(cs, :faulted_at))
   end
-
 
 end
