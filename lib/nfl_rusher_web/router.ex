@@ -13,16 +13,19 @@ defmodule NflRusherWeb.Router do
     plug :accepts, ["json"]
   end
 
-  scope "/", NflRusherWeb do
+  scope "/" do
     pipe_through :browser
 
-    get "/", PageController, :index
+    get "/", NflRusherWeb.PageController, :index
   end
 
-  # Other scopes may use custom stacks.
-  # scope "/api", NflRusherWeb do
-  #   pipe_through :api
-  # end
+  scope "/api" do
+    pipe_through :api
+
+    forward "/graphiql", Absinthe.Plug.GraphiQL, schema: NflRusherWeb.Schema
+
+    forward "/", Absinthe.Plug, schema: NflRusher.Schema
+  end
 
   # Enables LiveDashboard only for development
   #

@@ -36,10 +36,6 @@ defmodule NflRusher.Rusher do
       |> set_names
   end
 
-  defp import_fields do
-    @required_default_fields
-  end
-
   defp set_names(cs) do
     player = get_field(cs, :player)
 
