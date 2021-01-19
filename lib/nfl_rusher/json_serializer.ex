@@ -4,15 +4,21 @@ defmodule NflRusher.JsonSerializer do
   alias NflRusher.{Repo, RusherVersion}
   alias Ecto.Changeset
 
-  def import(file_path, options \\ [])
 
-  def import(file_path, [async: false] = options) do
-    file_path
-      |> create_version!(options[:name])
-      |> process_version!
+  def import_file(options) do
+    import_path = options[:path]
+      |> copy_file
+
+    version =  create_version!(path: import_path)
+
+    if Keyword.has_key?(options, :async) && !options[:async] do
+      {:ok, process_version!(version)}
+    else 
+      {:ok, version}
+    end
   end
 
-  def import(file_path, options) do
+  defp copy_file(file_path) do
     file_name = DateTime.utc_now
       |> DateTime.to_string 
 
@@ -20,15 +26,15 @@ defmodule NflRusher.JsonSerializer do
 
     File.cp(file_path, import_path)
 
-    {:ok, create_version!(import_path, options[:name])}
+    import_path
   end
 
   def process_version!(version) do
     try do
       version
-        |> process_start
-        |> process_rushers
-	|> process_finish
+        |> process_start!
+        |> process_rushers!
+	|> process_finish!
       {:ok, version}
     rescue
       e in RuntimeError ->
@@ -48,7 +54,7 @@ defmodule NflRusher.JsonSerializer do
     }) |> Repo.update!
   end
 
-  defp process_finish(version) do
+  defp process_finish!(version) do
     File.rm version.import_path
 
     RusherVersion.changeset_complete(version) |> Repo.update!
@@ -67,27 +73,27 @@ defmodule NflRusher.JsonSerializer do
       |> String.downcase()
   end
 
-  defp create_version!(file_path, nil) do
-    create_version!(file_path, file_to_sha256(file_path))
-  end
-
-  defp create_version!(file_path, name) do
+  defp create_version!(path: path, name: name) do
     
     RusherVersion.changeset_create(%RusherVersion{}, %{
-      file_sha256: file_to_sha256(file_path), 
+      file_sha256: file_to_sha256(path), 
       name: name,
-      import_path: file_path 
+      import_path: path 
     })
       |> Repo.insert!
   end
 
-  defp process_start(version) do
+  defp create_version!(path: path) do
+    create_version!(path: path, name: file_to_sha256(path))
+  end
+
+  defp process_start!(version) do
     version
       |> RusherVersion.changeset_start()
       |> Repo.update!
   end
 
-  defp process_rushers(version) do
+  defp process_rushers!(version) do
     version.import_path
       |> read_file
       |> process_entries(version)
