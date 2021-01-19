@@ -75,9 +75,11 @@ defmodule NflRusherWeb.Schema do
   end
 
   mutation do
+    
+    @desc "Imports a JSON file"
     field :import_json_file, non_null(:payload_import_json_file) do
       arg :input, non_null(:input_import_json_file)
-      resolve &ResolverImportJSONFile.resolve/3
+      resolve &ResolverImportJsonRile.resolve/3
     end
   end
 end
