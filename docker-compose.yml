@@ -15,7 +15,7 @@ services:
     depends_on:
       - db
     volumes:
-      - src:/src
+      - import:/app/imports
   db:
     image: postgres:9.6
     environment:
@@ -27,4 +27,4 @@ services:
       - pgdata:/var/lib/postgresql/data
 volumes:
   pgdata:
-  src:
+  import:
