@@ -41,9 +41,14 @@ defmodule NflRusherWeb.Schema do
     value :fum, description: "Fumbles"
   end
 
+  enum :rusher_dir do
+    value :asc, description: "Ascending"
+    value :desc, description: "Descending"
+  end
+
   input_object :input_rushers_order do
     field :field, non_null(:rusher_field)
-    field :dir, :boolean
+    field :dir, :rusher_dir
   end
 
   input_object :input_rushers do
@@ -79,7 +84,7 @@ defmodule NflRusherWeb.Schema do
     @desc "Imports a JSON file"
     field :import_json_file, non_null(:payload_import_json_file) do
       arg :input, non_null(:input_import_json_file)
-      resolve &ResolverImportJsonRile.resolve/3
+      resolve &ResolverImportJSONFile.resolve/3
     end
   end
 end
