@@ -5,8 +5,8 @@ defmodule NflRusher.ResolverRushers do
   alias NflRusher.{Repo, Rusher}
 
   alias NflRusher.{Rusher, RusherVersion}
-  def resolve(_parent, args, _resolution) do
-    rushers = query_rushers(args)
+  def resolve(_parent, %{input: input}, _resolution) do
+    rushers = query_rushers(input)
       |> Enum.map(&build_rusher/1)
     
     {:ok, %{rushers: rushers}} 
@@ -76,14 +76,33 @@ defmodule NflRusher.ResolverRushers do
     end
   end
 
-  defp order(q, _options) do
-    (from r in q, order_by: r.player)
-  end
-
-  defp limit(%{limit: limit}), do: Enum.min(limit, @limit)
+  defp limit(%{limit: limit}), do: Enum.min([limit, @limit])
   defp limit(_), do: @limit
 
   defp offset(%{offset: offset}), do: offset
   defp offset(_), do: 0
+
+  defp direction(%{order: %{dir: :asc}}),  do: :asc
+  defp direction(_),  do: :desc
+
+  #TODO simplify
+  defp order(q, %{order: %{field: :id}} = options), do: (from r in q,  order_by: [{^direction(options), r.id}])
+  defp order(q, %{order: %{field: :player}} = options), do: (from r in q,  order_by: [{^direction(options), r.player}])
+  defp order(q, %{order: %{field: :att}} = options), do: (from r in q,  order_by: [{^direction(options), r.att}])
+  defp order(q, %{order: %{field: :att_g}} = options), do: (from r in q,  order_by: [{^direction(options), r.att_g}])
+  defp order(q, %{order: %{field: :avg}} = options), do: (from r in q,  order_by: [{^direction(options), r.avg}])
+  defp order(q, %{order: %{field: :fd}} = options), do: (from r in q,  order_by: [{^direction(options), r.fd}])
+  defp order(q, %{order: %{field: :fd_p}} = options), do: (from r in q,  order_by: [{^direction(options), r.fd_p}])
+  defp order(q, %{order: %{field: :lng}} = options), do: (from r in q,  order_by: [{^direction(options), r.lng}])
+  defp order(q, %{order: %{field: :lng_td}} = options), do: (from r in q,  order_by: [{^direction(options), r.lng_td}])
+  defp order(q, %{order: %{field: :plus_20}} = options), do: (from r in q,  order_by: [{^direction(options), r.plus_20}])
+  defp order(q, %{order: %{field: :plus_40}} = options), do: (from r in q,  order_by: [{^direction(options), r.plus_40}])
+  defp order(q, %{order: %{field: :pos}} = options), do: (from r in q,  order_by: [{^direction(options), r.pos}])
+  defp order(q, %{order: %{field: :td}} = options), do: (from r in q,  order_by: [{^direction(options), r.td}])
+  defp order(q, %{order: %{field: :team}} = options), do: (from r in q,  order_by: [{^direction(options), r.team}])
+  defp order(q, %{order: %{field: :yds}} = options), do: (from r in q,  order_by: [{^direction(options), r.yds}])
+  defp order(q, %{order: %{field: :yds_g}} = options), do: (from r in q,  order_by: [{^direction(options), r.yds_g}])
+  defp order(q, %{order: %{field: :fum}} = options), do: (from r in q,  order_by: [{^direction(options), r.fum}])
+ 
 
 end
