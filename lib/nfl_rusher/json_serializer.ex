@@ -49,9 +49,9 @@ defmodule NflRusher.JsonSerializer do
   end
 
   defp process_finish(version) do
-    RusherVersion.changeset_complete(version) |> Repo.update!
-
     File.rm version.import_path
+
+    RusherVersion.changeset_complete(version) |> Repo.update!
   end
 
   defp file_to_sha256(file_path) do
@@ -73,7 +73,7 @@ defmodule NflRusher.JsonSerializer do
 
   defp create_version!(file_path, name) do
     
-    RusherVersion.changeset_start(%RusherVersion{
+    RusherVersion.changeset_create(%RusherVersion{}, %{
       file_sha256: file_to_sha256(file_path), 
       name: name,
       import_path: file_path 
@@ -83,7 +83,7 @@ defmodule NflRusher.JsonSerializer do
 
   defp process_start(version) do
     version
-      |> RusherVersion.changeset_start
+      |> RusherVersion.changeset_start()
       |> Repo.update!
   end
 
@@ -91,6 +91,8 @@ defmodule NflRusher.JsonSerializer do
     version.import_path
       |> read_file
       |> process_entries(version)
+
+    version  
   end
 
   defp process_entry(data, version) do
