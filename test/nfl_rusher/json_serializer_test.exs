@@ -1,14 +1,14 @@
 defmodule NflRusher.JsonSerializerTest do
   use NflRusher.DataCase, async: true
-  alias NflRusher.JsonSerializer
+  alias NflRusher.{RusherVersion, JsonService}
 
   @main_test_file "test/rushing.json"
 
   test "json async start serialization of valid file" do
-    {:ok, _version} = JsonSerializer.import_file(path: @main_test_file)
+    {:ok, %Task{}} = JsonService.import_file(@main_test_file)
   end
 
   test "json sync serialization of valid file" do
-    {:ok, _version} = JsonSerializer.import_file(path: @main_test_file, async: false)
+    {:ok, %RusherVersion{}} = JsonService.import_file(@main_test_file, async: false)
   end
 end

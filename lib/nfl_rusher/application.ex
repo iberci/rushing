@@ -14,8 +14,7 @@ defmodule NflRusher.Application do
       # Start the PubSub system
       {Phoenix.PubSub, name: NflRusher.PubSub},
       # Start the Endpoint (http/https)
-      NflRusherWeb.Endpoint,
-      NflRusher.ImportService
+      NflRusherWeb.Endpoint
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

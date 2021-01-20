@@ -1,21 +1,39 @@
-defmodule NflRusher.JsonSerializer do
+defmodule NflRusher.JsonService do
 
-  alias NflRusher.Rusher
-  alias NflRusher.{Repo, RusherVersion}
+  alias NflRusher.{Rusher, Repo, RusherVersion}
   alias Ecto.Changeset
+  import Ecto.Query
 
 
-  def import_file(options) do
-    import_path = options[:path]
+  def import_file(path, options) do
+    import_path =  path
       |> copy_file
 
-    version =  create_version!(path: import_path)
+    create_version!(path: import_path)
 
-    if Keyword.has_key?(options, :async) && !options[:async] do
-      {:ok, process_version!(version)}
-    else 
-      {:ok, version}
+    process!(options)
+  end
+
+  def import_file(path) do
+    import_file(path, [])
+  end
+
+  def process!(options) do
+    with nil <- awaiting_processing() do
+      {:error, "Nothing to Process"}
+    else
+      version ->
+        process_version!(version, options) 
     end
+  end
+
+  def awaiting_processing() do
+    (from rv in RusherVersion,
+      where: is_nil(rv.completed_at),
+      where: is_nil(rv.faulted_at),
+      where: is_nil(rv.started_at),
+      order_by: [desc: rv.inserted_at])
+      |> Repo.one
   end
 
   defp copy_file(file_path) do
@@ -29,7 +47,7 @@ defmodule NflRusher.JsonSerializer do
     import_path
   end
 
-  def process_version!(version) do
+  defp process_version!(version, async: false) do
     try do
       version
         |> process_start!
@@ -41,6 +59,10 @@ defmodule NflRusher.JsonSerializer do
         process_error(version, e)
         {:error, e}
     end
+  end
+
+  defp process_version!(version, _options) do
+    {:ok, Task.async(fn -> process_version!(version, aysnc: false) end)}
   end
 
   defp process_error(version, e) do
