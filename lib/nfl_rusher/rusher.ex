@@ -26,6 +26,7 @@ defmodule NflRusher.Rusher do
 
   @required_default_fields [:avg, :player, :team, :pos, :att, :att_g, :yds, :yds_g, :td, :lng, :lng_td, :fd, :fd_p, :plus_20, :plus_40, :fum]
 
+  @reject_token_length 2
 
   @doc false
   def changeset(rusher) do
@@ -40,6 +41,7 @@ defmodule NflRusher.Rusher do
     player = get_field(cs, :player)
 
     rusher_names = Regex.split(~r/[\s,]+/, player)
+      |> Enum.filter(fn (x) -> String.length(x) > @reject_token_length end)
       |> Enum.with_index(1)
       |> Enum.map(fn ({name, ordinal}) -> build_rusher_name(name, ordinal) end)
      

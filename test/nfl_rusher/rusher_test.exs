@@ -2,20 +2,42 @@ defmodule NflRusher.RusherTest do
   use NflRusher.DataCase, async: true
 
   alias NflRusher.Rusher
-  import Rusher
+  alias Ecto.Changeset
 
-  test "rusher names with multiple names" do
-    assert 3 ==  changeset(sample_rusher("First Middle Last"))
+  test "more than 2 names" do
+    assert 3 == "One Two Three"
+      |> sample_rusher()
+      |> Rusher.changeset()
       |> get_field(:rusher_names)
       |> Enum.count
   end
 
+  test "2 character or smaller names get rejected" do
+    assert 2 == "XX Two Three"
+      |> sample_rusher()
+      |> Rusher.changeset()
+      |> Changeset.get_field(:rusher_names)
+      |> Enum.count
+ 
+  end
+
+  test "ensure that all names are downcased" do
+     assert ["cap", "mix"] == "CAP mIx"
+      |> sample_rusher() 
+      |> Rusher.changeset()
+      |> get_field(:rusher_names)
+      |> Enum.map(&(Map.get(&1, :index_name)))
+  end
+
   test "rusher crud operations" do
-    cs = changeset(sample_rusher())
+    cs = sample_rusher()
+      |> Rusher.changeset()
 
     case Repo.insert(cs) do
-      {:error, msg} -> flunk(msg)
-      {:ok, rec} -> assert (from r in Rusher, where: r.id == ^(rec.id)) |> Repo.one
+    {:ok, rusher} ->
+      assert (from r in Rusher, where: r.id == ^(rusher.id)) |> Repo.one
+    {:error, msg} ->
+      flunk(msg)
     end
   end
 

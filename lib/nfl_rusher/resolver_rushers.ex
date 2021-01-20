@@ -4,7 +4,7 @@ defmodule NflRusher.ResolverRushers do
   import Ecto.Query
   alias NflRusher.{Repo, Rusher}
 
-  alias NflRusher.{Rusher, RusherVersion}
+  alias NflRusher.{Rusher, RusherVersion, RusherName}
   def resolve(_parent, %{input: input}, _resolution) do
     rushers = query_rushers(input)
       |> Enum.map(&build_rusher/1)
@@ -67,14 +67,27 @@ defmodule NflRusher.ResolverRushers do
     else
       version ->
         (from r in Rusher,
-	  join: rv in RusherVersion,
+	  join: rv in assoc(r, :rusher_version),
 	  where: rv.id == ^version.id, 
           limit: ^limit(options),
           offset: ^offset(options))
         |> order(options)
+	|> search(options)
         |> Repo.all
     end
   end
+
+  defp search(q, %{search: search}) do
+    term = search
+      |> String.downcase
+
+    index_term = "%#{search}%"
+
+    (from r in q, 
+      join: rn in assoc(r, :rusher_names),
+      where: like(rn.index_name, ^index_term))
+  end
+  defp search(q, _), do: q
 
   defp limit(%{limit: limit}), do: Enum.min([limit, @limit])
   defp limit(_), do: @limit
