@@ -25,6 +25,8 @@ defmodule NflRusherWeb.Router do
     pipe_through :browser
 
     get "/", NflRusherWeb.PageController, :index
+
+    post "/import_file", NflRusherWeb.FileImporter, :import_file
   end
 
   # Enables LiveDashboard only for development

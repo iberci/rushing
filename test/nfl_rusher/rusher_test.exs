@@ -72,7 +72,7 @@ defmodule NflRusher.RusherTest do
 
     @sample_data
       |> Map.put("Player", name)
-      |> NflRusher.JsonService.build_rusher(sample_version)
+      |> NflRusher.FileImporter.build_rusher(sample_version)
   end
 
   defp sample_rusher() do

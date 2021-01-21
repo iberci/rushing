@@ -62,29 +62,10 @@ defmodule NflRusherWeb.Schema do
     field :rushers, non_null(list_of(:rusher))
   end
 
-  input_object :input_import_json_file do
-    field :file, non_null(:upload)
-    field :name, :string
-  end
-
-  object :payload_import_json_file do
-    field :version_id, :id
-    field :version_name, :string
-  end
-
   query do
     field :rushers, non_null(:payload_rushers) do
       arg :input, non_null(:input_rushers)
       resolve &ResolverRushers.resolve/3
-    end
-  end
-
-  mutation do
-    
-    @desc "Imports a JSON file"
-    field :import_json_file, non_null(:payload_import_json_file) do
-      arg :input, non_null(:input_import_json_file)
-      resolve &ResolverImportJSONFile.resolve/3
     end
   end
 end

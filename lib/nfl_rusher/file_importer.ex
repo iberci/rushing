@@ -1,4 +1,4 @@
-defmodule NflRusher.JsonService do
+defmodule NflRusher.FileImporter do
 
   alias NflRusher.{Rusher, Repo, RusherVersion}
   alias Ecto.Changeset
@@ -6,7 +6,7 @@ defmodule NflRusher.JsonService do
 
 
   def import_file(path, options) do
-    import_path =  path
+    import_path = path
       |> copy_file
 
     create_version!(path: import_path)
@@ -32,7 +32,8 @@ defmodule NflRusher.JsonService do
       where: is_nil(rv.completed_at),
       where: is_nil(rv.faulted_at),
       where: is_nil(rv.started_at),
-      order_by: [desc: rv.inserted_at])
+      order_by: [desc: rv.inserted_at], 
+      limit: 1)
       |> Repo.one
   end
 
