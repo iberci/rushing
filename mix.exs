@@ -48,7 +48,9 @@ defmodule NflRusher.MixProject do
       {:plug_cowboy, "~> 2.0"},
       {:json, "~> 1.4"},
       {:absinthe, "~> 1.6"},
-      {:absinthe_plug, "~> 1.5.3"}
+      {:absinthe_plug, "~> 1.5.3"},
+      {:phoenix_live_view, "~> 0.15.3"},
+      {:floki, ">= 0.27.0", only: :test}
     ]
   end
 

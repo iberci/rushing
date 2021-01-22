@@ -1,0 +1,50 @@
+<section class="nfl-rushers">
+  <h1>NFL Rushers</h1>
+</section>
+
+<%= if @version do %>
+  <section class="version-info">
+     <table class="table table-bordered">
+       <thead>
+         <tr>
+	   <th>Version</th>
+	   <th>Started At</th>
+	   <th>Completed At</th>
+	   <th>Total</th>
+         </tr>
+       </thead>
+       <tbody>
+         <tr>
+           <td><%= @version.name %></td>
+           <td><%= @version.started_at |> DateTime.truncate(:second) %></td>
+           <td><%= @version.completed_at |> DateTime.truncate(:second) %></td>
+           <td><%= @count %></td>
+         </tr>
+       </tbody>
+     </table>
+   </section>
+   <iframe src="/api/graphiql" width="100%" allowfullscreen="true" height: "700px">
+   </iframe>
+<% else %>
+  <div class="explain">
+    There are currently no versions, please choose a valid json file to import
+  </div>
+<% end %>
+
+
+<form phx-submit="import_version" %>
+
+  <div class="form-group">
+    <label>Name (Optional)</label>
+    <%= text_input :form, :name, class: "form-control" %>
+  </div>
+
+  <div class="form-group">
+    <label>File Upload</label>
+    <%= file_input :form, :file, class: "form-control" %>
+  </div>
+
+  <div class="form-group">
+    <%= submit "Submit", class: "btn btn-primary" %>
+  </div>
+</form>

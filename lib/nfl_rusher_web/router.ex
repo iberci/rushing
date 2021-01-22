@@ -1,12 +1,14 @@
 defmodule NflRusherWeb.Router do
+  import Phoenix.LiveView.Router
   use NflRusherWeb, :router
 
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
-    plug :fetch_flash
+    plug :fetch_live_flash
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug :put_root_layout, {NflRusherWeb.LayoutView, :root}
   end
 
   pipeline :api do
@@ -24,7 +26,7 @@ defmodule NflRusherWeb.Router do
   scope "/" do
     pipe_through :browser
 
-    get "/", NflRusherWeb.PageController, :index
+    live "/", NflRusherWeb.PageLive, :index
 
     post "/import_file", NflRusherWeb.FileImporter, :import_file
   end
