@@ -25,7 +25,7 @@ defmodule NflRusherWeb.Router do
   scope "/", NflRusherWeb do
     pipe_through :browser
 
-    live "/", PageLive, :index
+    live "/", PageLive
   end
 
   # Enables LiveDashboard only for development

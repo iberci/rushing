@@ -53,8 +53,9 @@ defmodule NflRusher.ResolverRushers do
 
   def latest_version() do
     (from r in RusherVersion, 
-      where: not(is_nil(r.completed_at)),
-      order_by: r.completed_at)
+      where: not is_nil(r.completed_at),
+      order_by: [desc: r.completed_at],
+      limit: 1)
       |> Repo.one()
   end
 
@@ -114,6 +115,7 @@ defmodule NflRusher.ResolverRushers do
   defp order(q, %{order: %{field: :yds}} = options), do: (from r in q,  order_by: [{^direction(options), r.yds}])
   defp order(q, %{order: %{field: :yds_g}} = options), do: (from r in q,  order_by: [{^direction(options), r.yds_g}])
   defp order(q, %{order: %{field: :fum}} = options), do: (from r in q,  order_by: [{^direction(options), r.fum}])
+  defp order(q, _), do: q
  
 
 end

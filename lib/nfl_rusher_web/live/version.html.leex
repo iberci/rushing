@@ -1,0 +1,22 @@
+<section class="version-info">
+  <table class="table table-bordered">
+     <thead>
+       <tr>
+         <th>Version</th>
+         <th>Started At</th>
+         <th>Completed At</th>
+         <th>Total</th>
+       </tr>
+     </thead>
+     <tbody>
+       <tr>
+         <td><%= @version.name %></td>
+         <td><%= @version.started_at |> DateTime.truncate(:second) %></td>
+         <td><%= @version.completed_at |> DateTime.truncate(:second) %></td>
+       </tr>
+     </tbody>
+  </table>
+</section>
+<iframe src="/api/graphiql" width="100%" allowfullscreen="true" height: "700px">
+</iframe>
+

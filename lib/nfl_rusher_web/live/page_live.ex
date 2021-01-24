@@ -2,19 +2,29 @@ defmodule NflRusherWeb.PageLive do
   use NflRusherWeb, :live_view
   alias NflRusher.{FileImporter, Repo, RusherVersion, Rusher}
   import Ecto.Query
-  
-  
+
   @imports_folder "imports/"
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, 
-      socket
-        |> assign(version: nil)
-	|> assign(rusher_count: 0)
-	|> assign(uploaded_files: [])
-	|> allow_upload(:import_file, accept: ~w(.json))
+
+    {:ok, socket
+      |> assign_version(latest_version())
+      |> assign(uploaded_files: [])
+      |> allow_upload(:import_file, accept: ~w(.json), max_entries: 1)
     }
+  end
+
+  defp assign_version(socket, nil) do
+    socket
+      |> assign(version: nil)
+      |> assign(rusher_count: 0)
+  end
+
+  defp assign_version(socket, version) do
+    socket
+      |> assign(version: version)
+      |> assign(rusher_count: count_rushers(version.id))
   end
 
   @impl true
@@ -26,7 +36,7 @@ defmodule NflRusherWeb.PageLive do
 
       Task.async(fn ->
         {:ok, version} = FileImporter.import_file(path: import_path, name: name)
-        assign(socket, :version, version)
+	assign_version(socket, version)
       end)
 
     end)
@@ -49,6 +59,18 @@ defmodule NflRusherWeb.PageLive do
     select: count(r))
      |> Repo.one
 
+  end
+
+  def latest_version() do
+    (from r in RusherVersion,
+      where: not(is_nil(r.completed_at)), 
+      order_by: [desc: r.completed_at],
+      limit: 1
+    ) |> Repo.one()
+  end
+
+  def handle_info(ref, socket) do
+    {:noreply, socket}
   end
 
 end
