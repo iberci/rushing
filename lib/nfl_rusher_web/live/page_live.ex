@@ -4,10 +4,7 @@ defmodule NflRusherWeb.PageLive do
   import Ecto.Query
   
   
-  @impl true
-  def handle_event("validate", _params, socket) do
-    {:noreply, socket}
-  end
+  @imports_folder "imports/"
 
   @impl true
   def mount(_params, _session, socket) do
@@ -22,16 +19,26 @@ defmodule NflRusherWeb.PageLive do
 
   @impl true
   def handle_event("import_version", %{"form" => %{"name" => name}}, socket) do
-    files =  consume_uploaded_entries(socket, :import_file, fn %{path: path}, _entry -> 
-    
-      FileImporter.import_file(path, name: name)
+    consume_uploaded_entries(socket, :import_file, fn %{path: path}, _entry -> 
+      
+      import_path = cp_path(path)
+      File.cp(path, import_path)
+
+      Task.async(fn ->
+        {:ok, version} = FileImporter.import_file(path: import_path, name: name)
+        assign(socket, :version, version)
+      end)
+
     end)
 
-    1 = files
     {:noreply, socket}
   end
 
-  def handle_event("form_change", _arg, socket),  do: {:noreply, socket}
+  def handle_event("form_change", _params, socket),  do: {:noreply, socket}
+
+  defp cp_path(path) do
+    Path.join(@imports_folder, Path.basename(path))
+  end
 
   def count_rushers(nil), do: 0
 

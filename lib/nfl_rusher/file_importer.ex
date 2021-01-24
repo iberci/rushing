@@ -6,50 +6,18 @@ defmodule NflRusher.FileImporter do
 
   alias NflRusherWeb.Endpoint
 
-  def import_file(path, options) do
-    import_path = path
-      |> copy_file
+  def import_file(path: path, name: name) do
 
-    create_version!(path: import_path)
-
-    process!(options)
+    create_version!(path: path, name: name)
+      |> broadcast_new_version!()
+      |> process_version!
   end
 
-  def import_file(path) do
-    import_file(path, [])
+  def import_file(path: path) do
+    import_file(path: path, name: path)
   end
 
-  def process!(options) do
-    with nil <- awaiting_processing() do
-      {:error, "Nothing to Process"}
-    else
-      version ->
-        process_version!(version, options) 
-    end
-  end
-
-  def awaiting_processing() do
-    (from rv in RusherVersion,
-      where: is_nil(rv.completed_at),
-      where: is_nil(rv.faulted_at),
-      where: is_nil(rv.started_at),
-      order_by: [desc: rv.inserted_at], 
-      limit: 1)
-      |> Repo.one
-  end
-
-  defp copy_file(file_path) do
-    file_name = DateTime.utc_now
-      |> DateTime.to_string 
-
-    import_path =  "imports/"<>file_name
-
-    File.cp(file_path, import_path)
-
-    import_path
-  end
-
-  defp process_version!(version, async: false) do
+  defp process_version!(version) do
     try do
       version
         |> process_start!
@@ -61,10 +29,6 @@ defmodule NflRusher.FileImporter do
         process_error(version, e)
         {:error, e}
     end
-  end
-
-  defp process_version!(version, _options) do
-    {:ok, Task.async(fn -> process_version!(version, aysnc: false) end)}
   end
 
   defp process_error(version, e) do
@@ -105,26 +69,29 @@ defmodule NflRusher.FileImporter do
       import_path: path 
     })
       |> Repo.insert!
-      |> broadcast_new_version!
-  end
-
-  defp broadcast_new_version!(version) do
-    Endpoint.broadcast!("versions:*", "new", %{version_id: version.id})
-  end
-
-
-  defp broadcast_rusher_processed!(version, msg) do
-    Endpoint.broadcast!("versions:"<>version.id, "rusher", msg)
   end
 
   defp create_version!(path: path) do
-    create_version!(path: path, name: file_to_sha256(path))
+    create_version!(path: path, name: Path.basename(path))
+  end
+
+  defp broadcast_new_version!(version) do
+    Endpoint.broadcast!("versions:new", "new", version: version.name)
+
+    version
+  end
+
+
+  defp broadcast_rusher_processed!(player) do
+    Endpoint.broadcast!("versions:rusher", "importer", player)
   end
 
   defp process_start!(version) do
     version
       |> RusherVersion.changeset_start()
       |> Repo.update!
+
+    version
   end
 
   defp process_rushers!(version) do
@@ -149,12 +116,10 @@ defmodule NflRusher.FileImporter do
       |> Enum.map(&(process_entry(&1, version)))
       |> Enum.with_index()
       |> Enum.map(fn ({rusher, index}) -> 
-        broadcast_rusher_processed!(version, %{
+        broadcast_rusher_processed!(
 	  player: rusher.player,
 	  total: total,
-	  index: index
-	})
-	rusher
+	  index: index)
       end)
 
     version
