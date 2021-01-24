@@ -43,9 +43,11 @@ defmodule NflRusher.FileImporter do
   end
 
   defp process_finish!(version) do
-    File.rm version.import_path
+    version
+     |> RusherVersion.changeset_complete
+     |> Repo.update!
 
-    RusherVersion.changeset_complete(version) |> Repo.update!
+    version
   end
 
   defp file_to_sha256(file_path) do
