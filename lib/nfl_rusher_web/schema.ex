@@ -6,6 +6,7 @@ defmodule NflRusherWeb.Schema do
   alias NflRusher.ResolverRushers
   alias NflRusher.ResolverImportJSONFile
 
+  @desc "NFL Player"
   object :rusher do
     field :id, non_null(:id)
     field :player, non_null(:string)
@@ -24,6 +25,7 @@ defmodule NflRusherWeb.Schema do
     field :fum, non_null(:integer)
   end
 
+  @desc "Rusher Field"
   enum :rusher_field do
     value :player, description: "Player"
     value :att, description: "Attempts"
@@ -41,6 +43,7 @@ defmodule NflRusherWeb.Schema do
     value :fum, description: "Fumbles"
   end
 
+  @desc "Direction"
   enum :rusher_dir do
     value :asc, description: "Ascending"
     value :desc, description: "Descending"

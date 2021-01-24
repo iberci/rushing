@@ -50,7 +50,8 @@ defmodule NflRusher.MixProject do
       {:absinthe, "~> 1.6"},
       {:absinthe_plug, "~> 1.5.3"},
       {:phoenix_live_view, "~> 0.15.3"},
-      {:floki, ">= 0.27.0", only: :test}
+      {:floki, ">= 0.27.0", only: :test},
+      {:csv, ">= 1.1.0"}
     ]
   end
 

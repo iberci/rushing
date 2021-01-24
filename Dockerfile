@@ -12,6 +12,8 @@ ENV MIX_ENV=dev
 ENV XDG_CONFIG_HOME=/src/config
 
 RUN mkdir -p /app/priv/static
+RUN mkdir -p /app/imports
+RUN mkdir -p /app/exports
 
 RUN mix local.hex --force && mix local.rebar --force
 RUN mix deps.get 

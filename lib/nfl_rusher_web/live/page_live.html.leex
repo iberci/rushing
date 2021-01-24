@@ -2,6 +2,7 @@
   <h1>NFL Rushers</h1>
 </section>
 
+ <div phx-value-id="<%= @version.id %>">
   <section class="version-info">
     <table class="table table-bordered">
       <thead>
@@ -10,6 +11,7 @@
 	  <th>Started At</th>
 	  <th>Completed At</th>
 	  <th>Total</th>
+	  <th>Export</th>
         </tr>
       </thead>
       <tbody>
@@ -18,28 +20,34 @@
           <td><%= @version.started_at |> DateTime.truncate(:second) %></td>
           <td><%= @version.completed_at |> DateTime.truncate(:second) %></td>
           <td><%= @rusher_count %></td>
+	  <td>
+	    <a href="/export/csv" class="button">CSV</a> 
+	  </td>
         </tr>
       </tbody>
     </table>
  </section>
+ </div>
 
  <a href="/api/graphiql">
    GraphQL interface
  </a>
 
-  <form action="#" phx-submit="import_version" phx-change="form_change">
+ <% if !@version do %>
+   <form action="#" phx-submit="import_version" phx-change="form_change">
 
-    <div class="form-group">
-      <label>File Upload</label>
-      <%= live_file_input @uploads.import_file, class: "form-control" %>
-    </div>
+      <div class="form-group">
+        <label>File Upload</label>
+        <%= live_file_input @uploads.import_file, class: "form-control" %>
+      </div>
 
-    <div class="form-group">
-      <label>Name (Optional)</label>
-      <%= text_input :form, :name, class: "form-control" %>
-    </div>
+      <div class="form-group">
+        <label>Name (Optional)</label>
+        <%= text_input :form, :name, class: "form-control" %>
+      </div>
 
-    <div class="form-group">
-      <%= submit "Submit", class: "btn btn-primary" %>
-    </div>
-  </form>
+      <div class="form-group">
+        <%= submit "Submit", class: "btn btn-primary" %>
+      </div>
+   </form>
+ <% end %>

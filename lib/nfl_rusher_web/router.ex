@@ -20,12 +20,15 @@ defmodule NflRusherWeb.Router do
     forward "/graphiql", Absinthe.Plug.GraphiQL, schema: NflRusherWeb.Schema
 
     forward "/", Absinthe.Plug, schema: NflRusherWeb.Schema
+
   end
 
   scope "/", NflRusherWeb do
     pipe_through :browser
 
     live "/", PageLive
+
+    get "/export/csv", Exporter, :export_csv
   end
 
   # Enables LiveDashboard only for development

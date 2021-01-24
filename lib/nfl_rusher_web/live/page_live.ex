@@ -44,6 +44,7 @@ defmodule NflRusherWeb.PageLive do
     {:noreply, socket}
   end
 
+  @impl
   def handle_event("form_change", _params, socket),  do: {:noreply, socket}
 
   defp cp_path(path) do
