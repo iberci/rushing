@@ -1,14 +1,13 @@
 defmodule NflRusherWeb.Router do
-  import Phoenix.LiveView.Router
   use NflRusherWeb, :router
 
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
     plug :fetch_live_flash
+    plug :put_root_layout, {NflRusherWeb.LayoutView, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
-    plug :put_root_layout, {NflRusherWeb.LayoutView, :root}
   end
 
   pipeline :api do
@@ -23,12 +22,10 @@ defmodule NflRusherWeb.Router do
     forward "/", Absinthe.Plug, schema: NflRusherWeb.Schema
   end
 
-  scope "/" do
+  scope "/", NflRusherWeb do
     pipe_through :browser
 
-    live "/", NflRusherWeb.PageLive, :index
-
-    post "/import_file", NflRusherWeb.FileImporter, :import_file
+    live "/", PageLive, :index
   end
 
   # Enables LiveDashboard only for development

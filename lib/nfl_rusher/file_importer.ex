@@ -4,6 +4,7 @@ defmodule NflRusher.FileImporter do
   alias Ecto.Changeset
   import Ecto.Query
 
+  alias NflRusherWeb.Endpoint
 
   def import_file(path, options) do
     import_path = path
@@ -104,6 +105,16 @@ defmodule NflRusher.FileImporter do
       import_path: path 
     })
       |> Repo.insert!
+      |> broadcast_new_version!
+  end
+
+  defp broadcast_new_version!(version) do
+    Endpoint.broadcast!("versions:*", "new", %{version_id: version.id})
+  end
+
+
+  defp broadcast_rusher_processed!(version, msg) do
+    Endpoint.broadcast!("versions:"<>version.id, "rusher", msg)
   end
 
   defp create_version!(path: path) do
@@ -117,11 +128,10 @@ defmodule NflRusher.FileImporter do
   end
 
   defp process_rushers!(version) do
-    version.import_path
+     entries = version.import_path
       |> read_file
-      |> process_entries(version)
 
-    version  
+     process_entries(version, entries)
   end
 
   defp process_entry(data, version) do
@@ -132,9 +142,22 @@ defmodule NflRusher.FileImporter do
       |> Repo.insert!
   end
 
-  defp process_entries(entries, version) do
+  defp process_entries(version, entries) do
+    total = length(entries)
+
     entries 
       |> Enum.map(&(process_entry(&1, version)))
+      |> Enum.with_index()
+      |> Enum.map(fn ({rusher, index}) -> 
+        broadcast_rusher_processed!(version, %{
+	  player: rusher.player,
+	  total: total,
+	  index: index
+	})
+	rusher
+      end)
+
+    version
   end
 
   defp read_file(file_path) do

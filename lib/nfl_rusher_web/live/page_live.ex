@@ -1,26 +1,37 @@
 defmodule NflRusherWeb.PageLive do
   use NflRusherWeb, :live_view
-  alias NflRusher.{Repo, RusherVersion, Rusher}
+  alias NflRusher.{FileImporter, Repo, RusherVersion, Rusher}
   import Ecto.Query
+  
+  
+  @impl true
+  def handle_event("validate", _params, socket) do
+    {:noreply, socket}
+  end
 
   @impl true
   def mount(_params, _session, socket) do
-    v = current_version()
-    {:ok, assign(socket, version: v , rusher_count: count_rushers(v.id))}
+    {:ok, 
+      socket
+        |> assign(version: nil)
+	|> assign(rusher_count: 0)
+	|> assign(uploaded_files: [])
+	|> allow_upload(:import_file, accept: ~w(.json))
+    }
   end
 
   @impl true
-  def handle_event("new_version", %{version: version}, socket) do
-    {:noreply, assign(socket, current_version: version, rusher_count: count_rushers(version.id))}
+  def handle_event("import_version", %{"form" => %{"name" => name}}, socket) do
+    files =  consume_uploaded_entries(socket, :import_file, fn %{path: path}, _entry -> 
+    
+      FileImporter.import_file(path, name: name)
+    end)
+
+    1 = files
+    {:noreply, socket}
   end
 
-  def current_version() do
-    (from rv in RusherVersion,
-      where: not(is_nil(rv.completed_at)),
-      order_by: [desc: rv.completed_at],
-      limit: 1)
-      |> Repo.one
-  end
+  def handle_event("form_change", _arg, socket),  do: {:noreply, socket}
 
   def count_rushers(nil), do: 0
 
@@ -31,9 +42,6 @@ defmodule NflRusherWeb.PageLive do
     select: count(r))
      |> Repo.one
 
-  end
-
-  def import_version() do
   end
 
 end
