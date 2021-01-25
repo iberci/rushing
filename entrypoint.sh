@@ -14,5 +14,5 @@ if [[ -z `psql -Atqc "\\list $PGDATABASE"` ]]; then
   echo "Database $PGDATABASE created."
 fi
 
-#exec mix phx.server
-exec sleep 1000000000
+exec mix phx.server
+#exec sleep 1000000000
