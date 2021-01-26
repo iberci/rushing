@@ -9,8 +9,6 @@ defmodule NflRusher.Application do
     children = [
       # Start the Ecto repository
       NflRusher.Repo,
-      # Start the Telemetry supervisor
-      NflRusherWeb.Telemetry,
       # Start the PubSub system
       {Phoenix.PubSub, name: NflRusher.PubSub},
       # Start the Endpoint (http/https)

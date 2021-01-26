@@ -17,35 +17,36 @@ defmodule NflRusherWeb.PageLive do
 
   defp assign_version(socket, nil) do
     socket
-      |> assign(version: nil)
-      |> assign(rusher_count: 0)
+      |> assign(%{
+        version: nil,
+	rusher_count: 0
+      })
   end
 
   defp assign_version(socket, version) do
     socket
-      |> assign(version: version)
-      |> assign(rusher_count: count_rushers(version.id))
+      |> assign(%{
+        version: version,
+	rusher_count: count_rushers(version.id)
+      })
   end
 
   @impl true
   def handle_event("import_version", %{"form" => %{"name" => name}}, socket) do
     consume_uploaded_entries(socket, :import_file, fn %{path: path}, _entry -> 
       
+      assign(socket, :name, name)
       import_path = cp_path(path)
       File.cp(path, import_path)
 
       Task.async(fn ->
         {:ok, version} = FileImporter.import_file(path: import_path, name: name)
-	assign_version(socket, version)
       end)
 
     end)
 
     {:noreply, socket}
   end
-
-  @impl
-  def handle_event("form_change", _params, socket),  do: {:noreply, socket}
 
   defp cp_path(path) do
     Path.join(@imports_folder, Path.basename(path))
@@ -70,8 +71,12 @@ defmodule NflRusherWeb.PageLive do
     ) |> Repo.one()
   end
 
-  def handle_info(ref, socket) do
+  def handle_event("form_change", %{"form" => %{"name" => name}}, socket) do
     {:noreply, socket}
+  end
+
+  def handle_info(_ref, socket) do
+    {:noreply, assign_version(socket, latest_version())}
   end
 
 end

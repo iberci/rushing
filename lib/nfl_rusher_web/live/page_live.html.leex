@@ -2,8 +2,7 @@
   <h1>NFL Rushers</h1>
 </section>
 
- <div phx-value-id="<%= @version.id %>">
-  <section class="version-info">
+ <section class="version-info">
     <table class="table table-bordered">
       <thead>
         <tr>
@@ -27,27 +26,24 @@
       </tbody>
     </table>
  </section>
- </div>
 
  <a href="/api/graphiql">
    GraphQL interface
  </a>
 
- <% if !@version do %>
-   <form action="#" phx-submit="import_version" phx-change="form_change">
+ <form action="#" phx-submit="import_version" phx-change="form_change">
 
-      <div class="form-group">
-        <label>File Upload</label>
-        <%= live_file_input @uploads.import_file, class: "form-control" %>
-      </div>
+    <div class="form-group">
+      <label>File Upload</label>
+      <%= live_file_input @uploads.import_file, class: "form-control" %>
+    </div>
 
-      <div class="form-group">
-        <label>Name (Optional)</label>
-        <%= text_input :form, :name, class: "form-control" %>
-      </div>
+    <div class="form-group">
+      <label>Name (Optional)</label>
+      <input name="form[name]" type="test" class: "form-control" %>
+    </div>
 
-      <div class="form-group">
-        <%= submit "Submit", class: "btn btn-primary" %>
-      </div>
-   </form>
- <% end %>
+    <div class="form-group">
+      <%= submit "Submit", class: "btn btn-primary" %>
+    </div>
+ </form>

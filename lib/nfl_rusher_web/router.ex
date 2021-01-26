@@ -43,7 +43,7 @@ defmodule NflRusherWeb.Router do
 
     scope "/" do
       pipe_through :browser
-      live_dashboard "/dashboard", metrics: NflRusherWeb.Telemetry
+      live_dashboard "/dashboard"
     end
   end
 end
