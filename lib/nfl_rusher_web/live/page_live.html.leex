@@ -15,9 +15,9 @@
       </thead>
       <tbody>
         <tr>
-          <td><%= @version.name %></td>
-          <td><%= @version.started_at |> DateTime.truncate(:second) %></td>
-          <td><%= @version.completed_at |> DateTime.truncate(:second) %></td>
+          <td><%= @name %></td>
+          <td><%= @started_at %></td>
+          <td><%= @completed_at %></td>
           <td><%= @rusher_count %></td>
 	  <td>
 	    <a href="/export/csv" class="button">CSV</a> 
@@ -40,7 +40,7 @@
 
     <div class="form-group">
       <label>Name (Optional)</label>
-      <input name="form[name]" type="test" class: "form-control" %>
+      <input name="form[name]" type="test" class="form-control" />
     </div>
 
     <div class="form-group">

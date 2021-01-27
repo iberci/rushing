@@ -19,7 +19,10 @@ defmodule NflRusherWeb.PageLive do
     socket
       |> assign(%{
         version: nil,
-	rusher_count: 0
+	rusher_count: 0,
+	name: nil,
+	started_at: nil,
+	completed_at: nil
       })
   end
 
@@ -27,25 +30,43 @@ defmodule NflRusherWeb.PageLive do
     socket
       |> assign(%{
         version: version,
-	rusher_count: count_rushers(version.id)
+	rusher_count: count_rushers(version.id),
+	name: version.name,
+	started_at: time_format(version.started_at),
+	completed_at: time_format(version.completed_at)
       })
   end
 
+  defp time_format(%DateTime{} = t), do: DateTime.truncate(t, :second)
+  defp time_format(_), do: ""
+
   @impl true
   def handle_event("import_version", %{"form" => %{"name" => name}}, socket) do
+    pid = self()
     consume_uploaded_entries(socket, :import_file, fn %{path: path}, _entry -> 
       
       assign(socket, :name, name)
       import_path = cp_path(path)
       File.cp(path, import_path)
 
-      Task.async(fn ->
+      Task.start(fn ->
         {:ok, version} = FileImporter.import_file(path: import_path, name: name)
+	send(pid, %{version: version})
       end)
 
     end)
 
     {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("form_change", %{"form" => %{"name" => name}}, socket) do
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info(%{version: version}, socket) do
+    {:noreply, assign_version(socket, version)}
   end
 
   defp cp_path(path) do
@@ -69,14 +90,6 @@ defmodule NflRusherWeb.PageLive do
       order_by: [desc: r.completed_at],
       limit: 1
     ) |> Repo.one()
-  end
-
-  def handle_event("form_change", %{"form" => %{"name" => name}}, socket) do
-    {:noreply, socket}
-  end
-
-  def handle_info(_ref, socket) do
-    {:noreply, assign_version(socket, latest_version())}
   end
 
 end
