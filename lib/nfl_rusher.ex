@@ -60,9 +60,9 @@ defmodule NflRusher do
       # Import basic rendering functionality (render, render_layout, etc)
       import Phoenix.View
 
-      import HelloWorldWeb.ErrorHelpers
-      import HelloWorldWeb.Gettext
-      alias HelloWorldWeb.Router.Helpers, as: Routes
+      import NflRusherWeb.ErrorHelpers
+      import NflRusherWeb.Gettext
+      alias NflRusherWeb.Router.Helpers, as: Routes
     end
   end
 
