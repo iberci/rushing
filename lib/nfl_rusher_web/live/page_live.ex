@@ -66,7 +66,11 @@ defmodule NflRusherWeb.PageLive do
 
   @impl true
   def handle_info(%{version: version}, socket) do
-    {:noreply, assign_version(socket, version)}
+     
+    {:noreply, socket
+       |> assign_version(version)
+       |> redirect(to: "/api/graphiql")
+    }
   end
 
   defp cp_path(path) do

@@ -1,7 +1,4 @@
-<section class="nfl-rushers">
-  <h1>NFL Rushers</h1>
-</section>
-
+<% if @completed_at do %>
  <section class="version-info">
     <table class="table table-bordered">
       <thead>
@@ -15,7 +12,7 @@
       </thead>
       <tbody>
         <tr>
-          <td><%= @name %></td>
+          <td><a href="api/graphiql"><%= @name %></a></td>
           <td><%= @started_at %></td>
           <td><%= @completed_at %></td>
           <td><%= @rusher_count %></td>
@@ -26,10 +23,7 @@
       </tbody>
     </table>
  </section>
-
- <a href="/api/graphiql">
-   GraphQL interface
- </a>
+<% end %>
 
  <form action="#" phx-submit="import_version" phx-change="form_change">
 
